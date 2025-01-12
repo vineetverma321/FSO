@@ -1,17 +1,98 @@
 import { useState } from 'react';
 
+const SearchFilter = ({ searchTerm, handleFilter }) => {
+  return (
+    <div>
+      filter shown with{'  '}
+      <input
+        name="filter"
+        value={searchTerm}
+        onChange={handleFilter}
+        autoComplete="off"
+      />
+    </div>
+  );
+};
+
+const FormNewPeople = ({
+  newName,
+  handleNewName,
+  newNumber,
+  handleNewNumber,
+  addNewPerson,
+}) => {
+  return (
+    <form onSubmit={addNewPerson}>
+      <div>
+        name:{' '}
+        <input
+          name="name"
+          value={newName}
+          onChange={handleNewName}
+          autoComplete="off"
+        />
+      </div>
+      <div>
+        number:{' '}
+        <input
+          name="number"
+          value={newNumber}
+          onChange={handleNewNumber}
+          autoComplete="off"
+        />
+      </div>
+      <div>
+        <button type="submit">add</button>
+      </div>
+    </form>
+  );
+};
+
+const Person = ({ perObj }) => {
+  return (
+    <div>
+      {perObj.name} {perObj.number}
+    </div>
+  );
+};
+
+const PersonsDisplay = ({ multPersons }) => {
+  return (
+    <div>
+      {multPersons.map((person) => (
+        <Person perObj={person} key={person.name + person.number} />
+      ))}
+    </div>
+  );
+};
+
+// start of app component
 const App = () => {
   const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '123 - 456 - 7890' },
+    { name: 'Arto Hellas', number: '123-456-7890' },
+    { name: 'Arto Vance', number: '1325-257-295' },
+    { name: 'what the hell', number: '462-492-9676' },
+    { name: 'divya verma', number: '337-329-4444' },
   ]);
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterPersons, setFilterPersons] = useState(persons);
 
   const handleNewName = (e) => {
     setNewName(e.target.value);
   };
   const handleNewNumber = (e) => {
     setNewNumber(e.target.value);
+  };
+
+  const handleFilter = (e) => {
+    setSearchTerm(e.target.value);
+    // const searchTerm = e.target.value.toLowerCase();
+    const newFilterPersons = persons.filter((person) =>
+      person.name.toLowerCase().includes(e.target.value.toLowerCase())
+    );
+    setFilterPersons(newFilterPersons);
   };
 
   const addNewPerson = (e) => {
@@ -22,8 +103,6 @@ const App = () => {
       number: newNumber,
     };
 
-    // console.log(persons.some((obj) => obj.name === newNameObj.name));
-
     persons.some(
       (obj) =>
         obj.name === newPersonObj.name && obj.number === newPersonObj.number
@@ -33,36 +112,24 @@ const App = () => {
         )
       : (setPersons(persons.concat(newPersonObj)),
         setNewName(''),
-        setNewNumber(''));
-  };
-
-  const Person = ({ perObj }) => {
-    return (
-      <div>
-        {perObj.name} {perObj.number}
-      </div>
-    );
+        setNewNumber(''),
+        setFilterPersons(persons.concat(newPersonObj)));
   };
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <form onSubmit={addNewPerson}>
-        <div>
-          name: <input value={newName} onChange={handleNewName} />
-        </div>
-        <div>
-          number: <input value={newNumber} onChange={handleNewNumber} />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-      <h2>Numbers</h2>
-      {persons.map((person) => (
-        // <div>{person.name}</div>
-        <Person perObj={person} key={person.name + person.number} />
-      ))}
+      <SearchFilter searchTerm={searchTerm} handleFilter={handleFilter} />
+      <h3>Add a new</h3>
+      <FormNewPeople
+        newName={newName}
+        handleNewName={handleNewName}
+        newNumber={newNumber}
+        handleNewNumber={handleNewNumber}
+        addNewPerson={addNewPerson}
+      />
+      <h3>Numbers</h3>
+      <PersonsDisplay multPersons={filterPersons} />
     </div>
   );
 };
