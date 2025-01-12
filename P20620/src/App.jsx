@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const SearchFilter = ({ searchTerm, handleFilter }) => {
   return (
@@ -69,15 +70,23 @@ const PersonsDisplay = ({ multPersons }) => {
 // start of app component
 const App = () => {
   const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '123-456-7890' },
-    { name: 'Arto Vance', number: '1325-257-295' },
-    { name: 'what the hell', number: '462-492-9676' },
-    { name: 'divya verma', number: '337-329-4444' },
+    // { name: 'Arto Hellas', number: '123-456-7890' },
+    // { name: 'Arto Vance', number: '1325-257-295' },
+    // { name: 'what the hell', number: '462-492-9676' },
+    // { name: 'divya verma', number: '337-329-4444' },
   ]);
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPersons, setFilterPersons] = useState(persons);
+
+  useEffect(() => {
+    axios.get('http://localhost:3001/persons').then((response) => {
+      // console.log(response.data);
+      setPersons(response.data);
+      setFilterPersons(response.data);
+    });
+  }, []);
 
   const handleNewName = (e) => {
     setNewName(e.target.value);
