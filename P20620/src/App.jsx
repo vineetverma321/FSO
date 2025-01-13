@@ -1,71 +1,8 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-
-const SearchFilter = ({ searchTerm, handleFilter }) => {
-  return (
-    <div>
-      filter shown with{'  '}
-      <input
-        name="filter"
-        value={searchTerm}
-        onChange={handleFilter}
-        autoComplete="off"
-      />
-    </div>
-  );
-};
-
-const FormNewPeople = ({
-  newName,
-  handleNewName,
-  newNumber,
-  handleNewNumber,
-  addNewPerson,
-}) => {
-  return (
-    <form onSubmit={addNewPerson}>
-      <div>
-        name:{' '}
-        <input
-          name="name"
-          value={newName}
-          onChange={handleNewName}
-          autoComplete="off"
-        />
-      </div>
-      <div>
-        number:{' '}
-        <input
-          name="number"
-          value={newNumber}
-          onChange={handleNewNumber}
-          autoComplete="off"
-        />
-      </div>
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
-  );
-};
-
-const Person = ({ perObj }) => {
-  return (
-    <div>
-      {perObj.name} {perObj.number}
-    </div>
-  );
-};
-
-const PersonsDisplay = ({ multPersons }) => {
-  return (
-    <div>
-      {multPersons.map((person) => (
-        <Person perObj={person} key={person.name + person.number} />
-      ))}
-    </div>
-  );
-};
+import personService from './services/persons';
+import SearchFilter from './components/searchFilter';
+import FormNewPeople from './components/FormNewPeople';
+import PersonsDisplay from './components/PersonsDisplay';
 
 // start of app component
 const App = () => {
@@ -81,10 +18,10 @@ const App = () => {
   const [filterPersons, setFilterPersons] = useState(persons);
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons').then((response) => {
-      // console.log(response.data);
-      setPersons(response.data);
-      setFilterPersons(response.data);
+    personService.get().then((people) => {
+      // console.log(people);
+      setPersons(people);
+      setFilterPersons(people);
     });
   }, []);
 
@@ -97,11 +34,21 @@ const App = () => {
 
   const handleFilter = (e) => {
     setSearchTerm(e.target.value);
-    // const searchTerm = e.target.value.toLowerCase();
     const newFilterPersons = persons.filter((person) =>
       person.name.toLowerCase().includes(e.target.value.toLowerCase())
     );
     setFilterPersons(newFilterPersons);
+  };
+
+  const Person = ({ perObj }) => {
+    return (
+      <div>
+        {perObj.name} {perObj.number}{' '}
+        <button onClick={() => delPerson(perObj.name, perObj.id)}>
+          Delete
+        </button>
+      </div>
+    );
   };
 
   const addNewPerson = (e) => {
@@ -119,10 +66,25 @@ const App = () => {
       ? alert(
           `${newPersonObj.name} already exists in the phonebook with number ${newPersonObj.number}`
         )
-      : (setPersons(persons.concat(newPersonObj)),
-        setNewName(''),
-        setNewNumber(''),
-        setFilterPersons(persons.concat(newPersonObj)));
+      : // axios.post('http://localhost:3001/persons', newPersonObj)
+        personService.create(newPersonObj).then((person) => {
+          setPersons(persons.concat(person)),
+            setNewName(''),
+            setNewNumber(''),
+            setFilterPersons(persons.concat(person));
+        });
+  };
+
+  const delPerson = (name, id) => {
+    if (window.confirm(`Delete ${name}?`)) {
+      personService.deletePerson(id).then((deletedPerson) => {
+        console.log(deletedPerson);
+        setPersons(persons.filter((person) => person.id !== deletedPerson.id));
+        setFilterPersons(
+          persons.filter((person) => person.id !== deletedPerson.id)
+        );
+      });
+    }
   };
 
   return (
@@ -138,7 +100,7 @@ const App = () => {
         addNewPerson={addNewPerson}
       />
       <h3>Numbers</h3>
-      <PersonsDisplay multPersons={filterPersons} />
+      <PersonsDisplay Person={Person} multPersons={filterPersons} />
     </div>
   );
 };
