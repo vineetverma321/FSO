@@ -18,4 +18,9 @@ const deletePerson = (id) => {
   return request.then((response) => response.data);
 };
 
+const replaceNumber = () => {
+  
+}
+
+
 export default { get, create, deletePerson };

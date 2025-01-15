@@ -64,9 +64,15 @@ const App = () => {
         obj.name === newPersonObj.name && obj.number === newPersonObj.number
     )
       ? alert(
-          `${newPersonObj.name} already exists in the phonebook with number ${newPersonObj.number}`
+          `${newPersonObj.name} already exists in the phonebook with number ${newPersonObj.number}.`
         )
-      : // axios.post('http://localhost:3001/persons', newPersonObj)
+      : (persons.some(
+      (obj) =>
+        obj.name === newPersonObj.name && obj.number !== newPersonObj.number) 
+      ? window.confirm(
+          `${newPersonObj.name} already exists in the phonebook with number ${obj.number}. Replace the old number with the new one S{newPersonObj.number}`)
+      
+      // axios.post('http://localhost:3001/persons', newPersonObj)
         personService.create(newPersonObj).then((person) => {
           setPersons(persons.concat(person)),
             setNewName(''),
